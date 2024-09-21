@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Res,
+  Req,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,7 +21,8 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { UserLoginDto } from './dto/login.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { Cookiegetter } from '../decorators/cookie_getter.decorator';
 
 @ApiTags('user')
 @Controller('user')
@@ -34,20 +37,31 @@ export class UserController {
   })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiBody({ type: CreateUserDto })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
-  @ApiOperation({ summary: 'bu yerda login  qilinadi' })
-  @ApiResponse({
-    status: 201,
-    description: 'The login  created.',
-  })
-  @Post('login')
-  login(
-    @Body() loginDto: UserLoginDto,
+  registerUser(
+    @Body() createUserDto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.userService.login(loginDto, res);
+    return this.userService.register(createUserDto);
+  }
+  // @ApiOperation({ summary: 'bu yerda login  qilinadi' })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: 'The login  created.',
+  // })
+  // @Post('login')
+  // login(
+  //   @Body() loginDto: UserLoginDto,
+  //   @Res({ passthrough: true }) res: Response,
+  // ) {
+  //   return this.userService.login(loginDto, res);
+  // }
+
+  @Post('logout')
+  logout(
+    @Cookiegetter('refresh_token') refreshToken: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.userService.logout(refreshToken, res);
   }
 
   @Get()

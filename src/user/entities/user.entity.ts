@@ -9,17 +9,11 @@ export class User {
   @Column()
   full_name: string;
 
-  @Column()
-  email: string;
-
   @Column({ unique: true })
   username: string;
 
-  @Column()
-  password: string;
-
   @Column({ nullable: true })
-  photo: string;
+  link: string;
 
   @Column({ nullable: true })
   refreshToken: string;

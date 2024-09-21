@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   Res,
 } from '@nestjs/common';
@@ -38,35 +39,81 @@ export class UserService {
     return { accessToken, refreshToken };
   }
 
-  async login(loginDto: UserLoginDto, @Res() res: Response) {
-    const user = await this.userModelRepository.findOne({
-      where: { username: loginDto.username },
-    });
+  // async login(loginDto: UserLoginDto, @Res() res: Response) {
+  //   const user = await this.userModelRepository.findOne({
+  //     where: { username: loginDto.username },
+  //   });
 
-    if (!user || loginDto.password != user.password) {
-      throw new BadRequestException('Invalid credentials');
+  //   if (!user || loginDto.password != user.password) {
+  //     throw new BadRequestException('Invalid credentials');
+  //   }
+
+  //   const tokens = await this.getTokens(user);
+
+  //   await this.userModelRepository.update(user.id, {
+  //     refreshToken: tokens.refreshToken,
+  //   });
+
+  //   res.cookie('refresh_token', tokens.refreshToken, {
+  //     maxAge: Number(process.env.COOKIE_TIME),
+  //     httpOnly: true,
+  //   });
+
+  //   return { tokens, message: 'Login successful' };
+  // }
+
+  async register(createUserDto: CreateUserDto) {
+    try {
+      const user = await this.userModelRepository.findOne({
+        where: { username: createUserDto.username },
+      });
+
+      if (user) {
+        throw new BadRequestException('User already exists');
+      }
+
+      const newUser = this.userModelRepository.create(createUserDto);
+      await this.userModelRepository.save(newUser);
+
+      return { message: 'User created successfully' };
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
     }
-
-    const tokens = await this.getTokens(user);
-
-    await this.userModelRepository.update(user.id, {
-      refreshToken: tokens.refreshToken,
-    });
-
-    res.cookie('refresh_token', tokens.refreshToken, {
-      maxAge: Number(process.env.COOKIE_TIME),
-      httpOnly: true,
-    });
-
-    return { tokens, message: 'Login successful' };
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async logout(refreshToken: string, res: Response) {
     try {
-      const deliveryOrder = this.userModelRepository.create(createUserDto);
-      return this.userModelRepository.save(deliveryOrder);
-    } catch (e) {
-      return { error: e.message };
+      const userData = await this.jwtService.verify(refreshToken, {
+        secret: process.env.REFRESH_TOKEN_KEY,
+      });
+
+      if (!userData) {
+        throw new BadRequestException('User not verified');
+      }
+
+      const user = await this.userModelRepository.findOne({
+        where: { id: userData.id },
+      });
+
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+
+      user.refreshToken = null;
+
+      // Hash the refresh token (assuming you have a property `hashed_refresh_token` in your Admin entity)
+      const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+      user.refreshToken = hashedRefreshToken;
+      await this.userModelRepository.save(user);
+      res.clearCookie('refresh_token');
+
+      const response = {
+        message: 'User logged out successfully',
+      };
+
+      return response;
+    } catch (error) {
+      throw new BadRequestException('Failed to logout');
     }
   }
 
@@ -100,7 +147,7 @@ export class UserService {
   async remove(id: number) {
     const userModelRepository = await this.findOne(id);
     if ('error' in userModelRepository) {
-      // DeliveryOrder not found, return the error
+      // user not found, return the error
       return userModelRepository;
     }
     return this.userModelRepository.remove([userModelRepository]);
