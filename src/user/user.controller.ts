@@ -43,18 +43,19 @@ export class UserController {
   ) {
     return this.userService.register(createUserDto);
   }
-  // @ApiOperation({ summary: 'bu yerda login  qilinadi' })
-  // @ApiResponse({
-  //   status: 201,
-  //   description: 'The login  created.',
-  // })
-  // @Post('login')
-  // login(
-  //   @Body() loginDto: UserLoginDto,
-  //   @Res({ passthrough: true }) res: Response,
-  // ) {
-  //   return this.userService.login(loginDto, res);
-  // }
+  
+  @ApiOperation({ summary: 'bu yerda login  qilinadi' })
+  @ApiResponse({
+    status: 201,
+    description: 'The login  created.',
+  })
+  @Post('login')
+  login(
+    @Body() loginDto: UserLoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.userService.login(loginDto, res);
+  }
 
   @Post('logout')
   logout(
@@ -83,6 +84,18 @@ export class UserController {
     return this.userService.findOne(+id);
   }
 
+  @Get('profile/:username')
+  @ApiOperation({ summary: 'Retrieve a user by username' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return the user with the given username.',
+  })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiParam({ name: 'username', type: String, description: 'User username' })
+  findUsername(@Param('username') username: string) {
+    return this.userService.findByUsername(username);
+  }
+
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user by ID' })
   @ApiResponse({
@@ -106,5 +119,12 @@ export class UserController {
   @ApiParam({ name: 'id', type: String, description: 'User ID' })
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @Post('username')
+  checkLogin(
+    @Cookiegetter('refresh_token') refreshToken: string,
+  ) {
+    return this.userService.checkLogin(refreshToken);
   }
 }

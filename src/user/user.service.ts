@@ -23,7 +23,10 @@ export class UserService {
     private readonly jwtService: JwtService,
   ) {}
   private async getTokens(user: User) {
-    const payload = { id: user.id };
+    const payload = {
+      id: user.id,
+      username: user.username,
+    };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -39,28 +42,28 @@ export class UserService {
     return { accessToken, refreshToken };
   }
 
-  // async login(loginDto: UserLoginDto, @Res() res: Response) {
-  //   const user = await this.userModelRepository.findOne({
-  //     where: { username: loginDto.username },
-  //   });
+  async login(loginDto: UserLoginDto, @Res() res: Response) {
+    const user = await this.userModelRepository.findOne({
+      where: { username: loginDto.username },
+    });
 
-  //   if (!user || loginDto.password != user.password) {
-  //     throw new BadRequestException('Invalid credentials');
-  //   }
+    if (!user || loginDto.password != user.password) {
+      throw new BadRequestException('Invalid credentials');
+    }
 
-  //   const tokens = await this.getTokens(user);
+    const tokens = await this.getTokens(user);
 
-  //   await this.userModelRepository.update(user.id, {
-  //     refreshToken: tokens.refreshToken,
-  //   });
+    await this.userModelRepository.update(user.id, {
+      refreshToken: tokens.refreshToken,
+    });
 
-  //   res.cookie('refresh_token', tokens.refreshToken, {
-  //     maxAge: Number(process.env.COOKIE_TIME),
-  //     httpOnly: true,
-  //   });
+    res.cookie('refresh_token', tokens.refreshToken, {
+      maxAge: Number(process.env.COOKIE_TIME),
+      httpOnly: true,
+    });
 
-  //   return { tokens, message: 'Login successful' };
-  // }
+    return { tokens, message: 'Login successful' };
+  }
 
   async register(createUserDto: CreateUserDto) {
     try {
@@ -116,6 +119,21 @@ export class UserService {
       throw new BadRequestException('Failed to logout');
     }
   }
+  async checkLogin(refreshToken: string): Promise<string> {
+    const userData = await this.jwtService.verify(refreshToken, {
+      secret: process.env.REFRESH_TOKEN_KEY,
+    });
+    if (!userData) {
+      return;
+    }
+    const user = await this.userModelRepository.findOne({
+      where: { id: userData.id },
+    });
+    if (!user) {
+      return;
+    }
+    return user.username;
+  }
 
   async findAll() {
     return this.userModelRepository.find();
@@ -151,5 +169,19 @@ export class UserService {
       return userModelRepository;
     }
     return this.userModelRepository.remove([userModelRepository]);
+  }
+
+  async findByUsername(username: string) {
+    try {
+      const user = await this.userModelRepository.findOne({
+        where: { username: username },
+      });
+      if (!user) {
+        throw new NotFoundException(`user with this Username not found`);
+      }
+      return user;
+    } catch (e) {
+      return { error: e.message };
+    }
   }
 }

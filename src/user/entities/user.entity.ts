@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, OneToMany, Column } from 'typeorm';
-import { Url } from '../../url/entities/url.entity';
+import { UserLink } from '../../user_links/entities/user_link.entity';
 
 @Entity()
 export class User {
@@ -13,11 +13,17 @@ export class User {
   username: string;
 
   @Column({ nullable: true })
-  link: string;
+  password: string;
+
+  @Column({ nullable: true })
+  photo: string;
+
+  @Column({ nullable: true })
+  email: string;
 
   @Column({ nullable: true })
   refreshToken: string;
 
-  @OneToMany(() => Url, (url) => url.user)
-  urls: Url[];
+  @OneToMany(() => UserLink, (userLink) => userLink.user, { cascade: true })
+  links: UserLink[];
 }

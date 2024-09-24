@@ -4,10 +4,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 // import { Admin } from './admin/entities/admin.entity';
 import { AdminModule } from './admin/admin.module';
 import { Admin } from './admin/entities/admin.entity';
-import { UrlModule } from './url/url.module';
+
 import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
-import { Url } from './url/entities/url.entity';
+
+import { UserLinksModule } from './user_links/user_links.module';
+import { UserLink } from './user_links/entities/user_link.entity';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -19,14 +22,15 @@ import { Url } from './url/entities/url.entity';
       username: process.env.DB_USER,
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
-      entities: [Admin, User, Url],
+      entities: [Admin, User, UserLink,],
       synchronize: true,
       logging: false,
     }),
     AdminModule,
     UserModule,
-    UrlModule,
-    
+    UploadModule,
+
+    UserLinksModule,
   ],
   controllers: [],
   providers: [],

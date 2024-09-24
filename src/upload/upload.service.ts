@@ -1,6 +1,5 @@
-// src/upload/upload.service.ts
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { bucket } from '../../firebase.config';
+import { bucket } from '../config/firebase.config';
 
 @Injectable()
 export class UploadService {
@@ -9,7 +8,7 @@ export class UploadService {
       throw new HttpException('No file provided', HttpStatus.BAD_REQUEST);
     }
 
-    const fileName = `${Date.now()}_${file.originalname}`;
+    const fileName = `${Date.now()}_${file.originalname}`; // Optional: Use uuid for better uniqueness
     const fileUpload = bucket.file(fileName);
 
     return new Promise<string>((resolve, reject) => {
@@ -30,7 +29,7 @@ export class UploadService {
 
       stream.on('finish', async () => {
         try {
-          await fileUpload.makePublic(); // Ensure the file is publicly accessible
+          await fileUpload.makePublic(); // Make the file public (if needed)
           const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
           resolve(publicUrl);
         } catch (err) {
