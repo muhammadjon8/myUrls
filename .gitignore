@@ -59,6 +59,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 #firebase
 /config
 /firebase.config.ts
-.firbase-service-account.json
+firbase-service-account.json
 path/to/secret-file.json
 *.env
