@@ -19,6 +19,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { UserLink } from './entities/user_link.entity';
 
 @ApiTags('User Links') // Groups endpoints under 'User Links' in Swagger
 @Controller('user-links')
@@ -45,6 +46,15 @@ export class UserLinksController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Retrieve all user links' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 404, description: 'User links not found' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  findUserLinks(@Param('id') id: string): Promise<UserLink[]> {
+    return this.userLinksService.userLinks(+id);
+  }
+
+  @Get(':id')
   @ApiOperation({ summary: 'Retrieve a specific user link by ID' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'User link not found.' })
@@ -68,6 +78,6 @@ export class UserLinksController {
   @ApiResponse({ status: 200, description: 'User link deleted successfully.' })
   @ApiResponse({ status: 404, description: 'User link not found.' })
   remove(@Param('id') id: string) {
-    return this.userLinksService.remove(+id);
+    return this.userLinksService.removeUserLink(+id);
   }
 }

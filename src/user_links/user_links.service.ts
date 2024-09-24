@@ -22,10 +22,7 @@ export class UserLinksService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(
-    createUserLinkDto: CreateUserLinkDto,
-    refreshToken: string,
-  ) {
+  async create(createUserLinkDto: CreateUserLinkDto, refreshToken: string) {
     try {
       const userData = await this.jwtService.verify(refreshToken, {
         secret: process.env.REFRESH_TOKEN_KEY,
@@ -77,12 +74,29 @@ export class UserLinksService {
     }
   }
 
-  async remove(id: number) {
+  async removeUserLink(id: number) {
     const userLinkRepo = await this.findOne(id);
     if ('error' in userLinkRepo) {
       // DeliveryOrder not found, return the error
       return userLinkRepo;
     }
     return this.userLinkRepo.remove([userLinkRepo]);
+  }
+
+  async userLinks(id: number) {
+    try {
+      const userLinks = await this.userLinkRepo.find({
+        where: { user_id: id },
+      });
+      console.log(userLinks)
+
+      if (userLinks.length === 0) {
+        throw new NotFoundException(`No links found for user with ID ${id}`);
+      }
+
+      return userLinks;
+    } catch (error) {
+      throw new BadRequestException('Error getting user links');
+    }
   }
 }
