@@ -19,27 +19,11 @@ export class UserLinksService {
     private readonly userLinkRepo: Repository<UserLink>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-    private readonly jwtService: JwtService,
   ) {}
 
-  async create(createUserLinkDto: CreateUserLinkDto, refreshToken: string) {
+  async create(createUserLinkDto: CreateUserLinkDto) {
     try {
-      const userData = await this.jwtService.verify(refreshToken, {
-        secret: process.env.REFRESH_TOKEN_KEY,
-      });
-      if (!userData) {
-        throw new BadRequestException('User not verified');
-      }
-      const user = await this.userRepo.findOne({
-        where: { id: userData.id },
-      });
-      if (!user) {
-        throw new BadRequestException('User not found');
-      }
-      const newLink = this.userLinkRepo.create({
-        user_id: user.id,
-        ...createUserLinkDto,
-      });
+      const newLink = this.userLinkRepo.create(createUserLinkDto);
       await this.userLinkRepo.save(newLink);
       return { message: 'User link created successfully' };
     } catch (e) {
@@ -88,7 +72,7 @@ export class UserLinksService {
       const userLinks = await this.userLinkRepo.find({
         where: { user_id: id },
       });
-      console.log(userLinks)
+      console.log(userLinks);
 
       if (userLinks.length === 0) {
         throw new NotFoundException(`No links found for user with ID ${id}`);

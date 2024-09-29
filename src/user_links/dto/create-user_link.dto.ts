@@ -2,6 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserLinkDto {
   @ApiProperty({
+    example: '1',
+    description: 'User ID',
+  })
+  user_id: number;
+  @ApiProperty({
     example: 'Instagram',
     description: 'URL name',
   })

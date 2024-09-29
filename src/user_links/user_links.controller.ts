@@ -28,14 +28,12 @@ export class UserLinksController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new user link' })
-  // @ApiBearerAuth() // Enables JWT Bearer Authentication in Swagger
   @ApiResponse({ status: 201, description: 'User link created successfully.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   create(
     @Body() createUserLinkDto: CreateUserLinkDto,
-    @Cookiegetter('refresh_token') refreshToken: string,
   ) {
-    return this.userLinksService.create(createUserLinkDto, refreshToken);
+    return this.userLinksService.create(createUserLinkDto);
   }
 
   @Get()
