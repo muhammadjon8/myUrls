@@ -62,6 +62,9 @@ export class UserService {
     res.cookie('refresh_token', tokens.refreshToken, {
       maxAge: Number(process.env.COOKIE_TIME),
       httpOnly: true,
+      path: "/",
+      sameSite: "none",
+      secure: true,
     });
 
     return { tokens, message: 'Login successful' };
