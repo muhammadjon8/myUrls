@@ -17,7 +17,7 @@ async function start() {
     .addTag('Mening Linklarim')
     .build();
   app.enableCors({
-    origin: "http://localhost:3000", // Replace with your allowed origins
+    origin: "*", // Replace with your allowed origins
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Specify allowed methods
     allowedHeaders: 'Content-Type, Accept, Authorization', // Specify allowed headers
     credentials: true, // Allow cookies to be sent with requests

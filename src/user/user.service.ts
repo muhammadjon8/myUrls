@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   Res,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,6 +15,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import { UserLoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+import { CheckValidation } from './dto/checkValidation.dto';
 
 @Injectable()
 export class UserService {
@@ -182,6 +184,30 @@ export class UserService {
       return user;
     } catch (e) {
       return { error: e.message };
+    }
+  }
+
+  async checkValidity(
+    refreshToken: string,
+    username: CheckValidation,
+  ): Promise<boolean> {
+    try {
+      // Verify and decode the refresh token
+      const userData = await this.jwtService.verify(refreshToken, {
+        secret: process.env.REFRESH_TOKEN_KEY,
+      });
+
+      if (!userData) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+      // Check if the username matches the one in the token
+      if (userData.username != username.username) {
+        throw new BadRequestException('Username is incorrect');
+      }
+
+      return true;
+    } catch (error) {
+      throw new UnauthorizedException("error: " + error.message);
     }
   }
 }

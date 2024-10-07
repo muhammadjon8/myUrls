@@ -23,6 +23,7 @@ import {
 import { UserLoginDto } from './dto/login.dto';
 import { Request, Response } from 'express';
 import { Cookiegetter } from '../decorators/cookie_getter.decorator';
+import { CheckValidation } from './dto/checkValidation.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -43,7 +44,7 @@ export class UserController {
   ) {
     return this.userService.register(createUserDto);
   }
-  
+
   @ApiOperation({ summary: 'bu yerda login  qilinadi' })
   @ApiResponse({
     status: 201,
@@ -122,9 +123,15 @@ export class UserController {
   }
 
   @Post('username')
-  checkLogin(
+  checkLogin(@Cookiegetter('refresh_token') refreshToken: string) {
+    return this.userService.checkLogin(refreshToken);
+  }
+
+  @Post('customize')
+  checkValidity(
+    @Body() checkValidation: CheckValidation,
     @Cookiegetter('refresh_token') refreshToken: string,
   ) {
-    return this.userService.checkLogin(refreshToken);
+    return this.userService.checkValidity(refreshToken, checkValidation);
   }
 }

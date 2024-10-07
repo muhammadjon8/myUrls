@@ -72,7 +72,7 @@ export class UserLinksService {
       const userLinks = await this.userLinkRepo.find({
         where: { user_id: id },
       });
-      console.log(userLinks);
+      // console.log(userLinks);
 
       if (userLinks.length === 0) {
         throw new NotFoundException(`No links found for user with ID ${id}`);
@@ -83,4 +83,7 @@ export class UserLinksService {
       throw new BadRequestException('Error getting user links');
     }
   }
+
+  
+  
 }
