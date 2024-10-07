@@ -60,11 +60,8 @@ export class UserService {
     });
 
     res.cookie('refresh_token', tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Ensure secure cookies are only used in production
-      sameSite: "none",
-      domain: 'mylinks-eight-plum.vercel.app',
       maxAge: Number(process.env.COOKIE_TIME),
+      httpOnly: true,
     });
 
     return { tokens, message: 'Login successful' };
