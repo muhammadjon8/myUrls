@@ -64,7 +64,6 @@ export class UserService {
       httpOnly: true,
       path: "/",
       sameSite: "none",
-      secure: true,
     });
 
     return { tokens, message: 'Login successful' };
