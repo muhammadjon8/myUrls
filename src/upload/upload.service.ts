@@ -8,7 +8,7 @@ export class UploadService {
       throw new HttpException('No file provided', HttpStatus.BAD_REQUEST);
     }
 
-    const fileName = `${Date.now()}_${file.originalname}`; // Optional: Use uuid for better uniqueness
+    const fileName = `${Date.now()}_${file.originalname}`; 
     const fileUpload = bucket.file(fileName);
 
     return new Promise<string>((resolve, reject) => {
